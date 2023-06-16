@@ -1,72 +1,41 @@
-// const express = require("express");
-// require("dotenv").config();
-// const app = express();
-// const cors = require("cors");
-// app.use(express.json());
-// app.use(cors()); // Add this line to enable CORS
-// const { Configuration, OpenAIApi } = require("openai");
+const express = require("express");
+require("dotenv").config();
+const app = express();
+const cors = require("cors");
 
-// const config = new Configuration({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-// const openai = new OpenAIApi(config);
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-// app.post("/summarize", async (req, res) => {
-//   const { story } = req.body;
+const { Configuration, OpenAIApi } = require("openai");
 
-//   // const words = story.split(" ");
-//   // const wordCount = words.length;
+// OpenAI API Configuration
+const config = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(config);
 
-//   // // Estimate the number of tokens based on average token length (e.g., 5 characters)
-//   // const averageTokenLength = 5;
-//   // const maxTokens = Math.ceil(wordCount * averageTokenLength);
+// POST Request
+app.post("/summary", async (req, res) => {
+  const { story } = req.body;
 
-//   const prompt = `Please summarize the following story:\n\n${story}\n\nSummary:`;
-//   const completions = await openai.createCompletion({
-//     model: "text-davinci-003",
-//     prompt,
-//     max_tokens: 200,
-//     n: 1,
-//     stop: null,
-//     temperature: 0.7,
-//   });
-//   const summary = completions.data.choices[0].text;
+  const prompt = `Please summarize the following story:\n\n${story}\n\nSummary:`;
+  const completions = await openai.createCompletion({
+    model: "text-davinci-003",
+    prompt,
+    max_tokens: 256,
+    temperature: 0.7,
+    top_p: 1,
+    frequency_penalty: 0,
+    presence_penalty: 0,
+  });
+  const summary = completions.data.choices[0].text;
 
-//   const bulletPoints = summary
-//     .split(". ")
-//     .map((sentence) => `<li>${sentence}</li>`);
+  res.json(summary);
+});
 
-//   const bulletList = `<ul>${bulletPoints.join("")}</ul>`;
-
-//   res.send(bulletList);
-//   // res.json({ summary });
-// });
-
-// // GET request for testing in the browser
-// app.get("/summarize", async (req, res) => {
-//   const { story } = req.query;
-//   const prompt = `Please summarize the following story:\n\n${story}\n\nSummary:`;
-//   const completions = await openai.createCompletion({
-//     model: "text-davinci-003",
-//     prompt,
-//     max_tokens: 200,
-//     n: 1,
-//     stop: null,
-//     temperature: 0.7,
-//   });
-//   const summary = completions.data.choices[0].text;
-//   const bulletPoints = summary
-//     .split(". ")
-//     .map((sentence) => `<li>${sentence}</li>`);
-
-//   const bulletList = `<ul>${bulletPoints.join("")}</ul>`;
-
-//   res.send(bulletList);
-
-//   // res.json({ summary });
-// });
-
-// const port = 3000;
-// app.listen(port, () => {
-//   console.log(`Server started on port ${port}`);
-// });
+// Server
+const port = 3001;
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+});
